@@ -87,16 +87,9 @@
             if (self.width == 0 && self.height == 0) {
                 data = UIImageJPEGRepresentation(image, self.quality/100.0f);
             } else {
-                //UIImage* scaledImage = [self imageByScalingNotCroppingForSize:image toSize:targetSize];
-                
-                UIImage* scaledImage = [self getScaleImage:image toSize:targetSize];
+                UIImage* scaledImage = [self imageByScalingNotCroppingForSize:image toSize:targetSize];
                 data = UIImageJPEGRepresentation(scaledImage, self.quality/100.0f);
-                NSLog(@"could not scale image=================================");
             }
-            
-            
-            //data = UIImageJPEGRepresentation(image, 100/100.0f);
-
             
             if (![data writeToFile:filePath options:NSAtomicWrite error:&err]) {
                 result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[err localizedDescription]];
@@ -136,11 +129,10 @@
     CGFloat scaleFactor = 0.0;
     CGSize scaledSize = frameSize;
 
-    
     if (CGSizeEqualToSize(imageSize, frameSize) == NO) {
         CGFloat widthFactor = targetWidth / width;
         CGFloat heightFactor = targetHeight / height;
-        
+
         // opposite comparison to imageByScalingAndCroppingForSize in order to contain the image within the given bounds
         if (widthFactor == 0.0) {
             scaleFactor = heightFactor;
@@ -151,9 +143,7 @@
         } else {
             scaleFactor = widthFactor; // scale to fit width
         }
-        
-       scaledSize = CGSizeMake(width * scaleFactor, height * scaleFactor);
-        //scaledSize = CGSizeMake(640.0f, 960.0f);
+        scaledSize = CGSizeMake(width * scaleFactor, height * scaleFactor);
     }
 
     UIGraphicsBeginImageContext(scaledSize); // this will resize
@@ -168,106 +158,6 @@
     // pop the context to get back to the default
     UIGraphicsEndImageContext();
     return newImage;
-}
-- (UIImage*)getScaleImage:(UIImage*)anImage toSize:(CGSize)frameSize
-{
-    UIImage* sourceImage = anImage;
-    UIImage* newImage = nil;
-    CGSize imageSize = sourceImage.size;
-    CGFloat width = imageSize.width;
-    CGFloat height = imageSize.height;
-    CGFloat targetWidth = frameSize.width;
-    CGFloat targetHeight = frameSize.height;
-    CGSize scaledSize = frameSize;
-    
-    CGFloat scaledWidth = targetWidth;
-    CGFloat scaledHeight = targetHeight;
-    
-    int inSampleSize = [self getScaleImageSize:sourceImage toSize:scaledSize];
-    scaledWidth = width/inSampleSize;
-    scaledHeight = height/inSampleSize;
-    
-    scaledSize = CGSizeMake(scaledWidth,scaledHeight);
-    
-     UIGraphicsBeginImageContext(scaledSize); // this will resize
-    [sourceImage drawInRect:CGRectMake(0, 0, scaledSize.width, scaledSize.height)];
-    
-    newImage = UIGraphicsGetImageFromCurrentImageContext();
-    if (newImage == nil) {
-        NSLog(@"could not scale image1111");
-    }
-    
-    // pop the context to get back to the default
-    UIGraphicsEndImageContext();
-    return newImage;
-//    if (CGSizeEqualToSize(imageSize, frameSize) == NO) {
-//        CGFloat widthFactor = targetWidth / width;
-//        CGFloat heightFactor = targetHeight / height;
-//        
-//        // opposite comparison to imageByScalingAndCroppingForSize in order to contain the image within the given bounds
-//        if (widthFactor == 0.0) {
-//            scaleFactor = heightFactor;
-//        } else if (heightFactor == 0.0) {
-//            scaleFactor = widthFactor;
-//        } else if (widthFactor > heightFactor) {
-//            scaleFactor = heightFactor; // scale to fit height
-//        } else {
-//            scaleFactor = widthFactor; // scale to fit width
-//        }
-//        // scaledSize = CGSizeMake(width * scaleFactor, height * scaleFactor);
-//  
-//        if(widthFactor > heightFactor){
-//            scaleFactor = widthFactor;
-//        }
-//        else{
-//            scaleFactor = heightFactor;
-//        }
-//        scaledWidth = width * scaleFactor;
-//        scaledHeight = height * scaleFactor;
-//        if(widthFactor > heightFactor){
-//            thumbnailPoint.y = (targetHeight - scaledHeight) * 0.5;
-//        }else if(widthFactor < heightFactor){
-//            thumbnailPoint.x = (targetWidth - scaledWidth) * 0.5;
-//        }
-//        
-//    }
-//    UIGraphicsBeginImageContext(scaledSize);
-//    
-//    CGRect thumbnailRect = CGRectZero;
-//    thumbnailRect.origin = thumbnailPoint;
-//    thumbnailRect.size.width = scaledWidth;
-//    thumbnailRect.size.height = scaledHeight;
-//    [sourceImage drawInRect:thumbnailRect];
-//    newImage = UIGraphicsGetImageFromCurrentImageContext();
-//    
-//    if(newImage == nil){
-//        NSLog(@"scale image fail");
-//    }
-//    
-//    UIGraphicsEndImageContext();
-//    
-//    return newImage;
-}
-
-
-- (int)getScaleImageSize:(UIImage*)anImage toSize:(CGSize)frameSize
-{
-    UIImage* sourceImage = anImage;
-    CGSize imageSize = sourceImage.size;
-    CGFloat width = imageSize.width;
-    CGFloat height = imageSize.height;
-    CGFloat targetWidth = 640;
-    CGFloat targetHeight = 960;
-
-    int inSampleSize = 1;
-    if(width>targetWidth||height>targetHeight){
-        while ((height/inSampleSize)>targetHeight||(width/inSampleSize)>targetWidth) {
-            inSampleSize *=2;
-        }
-    }
-    
-    
-    return inSampleSize;
 }
 
 @end
